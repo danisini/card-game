@@ -13,7 +13,7 @@ def text_objects(text, font):
     return text_surface, text_surface.get_rect()
 
 
-def button(message, start_x, start_y, width, height, font_size, inactive_color, active_color, action):
+def button(message, start_x, start_y, width, height, font_size, inactive_color, active_color, action=None):
     mouse_pos = pygame.mouse.get_pos()
     is_clicked = pygame.mouse.get_pressed()
 
@@ -23,7 +23,8 @@ def button(message, start_x, start_y, width, height, font_size, inactive_color, 
 
         # check if left button of mouse is clicked
         # is_clicked has 3 values (False, False, False) for left, middle, right button of the mouse
-        if is_clicked[0] == 1:
+        if is_clicked[0] == 1 and action is not None:
+            print("We are here")
             action()
     else:
         pygame.draw.rect(window, inactive_color, button_rect)

@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-#from src.deck import Deck
+from src.deck import Deck
 from src.tools import button
 
 
@@ -14,6 +14,7 @@ class TextInput(pygame.sprite.Sprite):
         self.text = self.font.render(self.text_value, True, self.color)
         self.bg = pygame.Rect(x, y, width, height)
 
+has_the_game_begun = False
 
 background_colour = (234, 212, 252)
 black = (0, 0, 0)
@@ -50,9 +51,38 @@ def text_objects(text, font):
     return text_surface, text_surface.get_rect()
 
 
+def begin_easy_game():
+    global has_the_game_begun
+    has_the_game_begun = True
+
+
+def game_home_screen(user_text):
+    # start message
+    text_surf, text_rect = text_objects("Enter balance, then choose a level", large_font)
+    text_rect.center = ((display_width / 2), (display_height / 3))
+    window.blit(text_surf, text_rect)
+
+    # start input box
+
+    # input_box = TextInput(0, 0, 0, 0, black, (130, 12, 22), 30)
+
+    input_rect = pygame.Rect(440, 340, 140, 40)
+    pygame.draw.rect(window, black, input_rect)
+    text_input_box_surface = small_font.render(user_text, True, white)
+
+    window.blit(text_input_box_surface, (input_rect.x + 5, input_rect.y + 5))
+
+    # buttons for levels - Easy, Hard
+
+    button("Easy", 240, 440, 140, 80, 80, green, bright_green, begin_easy_game)
+    button("Hard", 640, 440, 140, 80, 80, green, bright_green, None)
+
+
 def game_intro():
     user_text = ''
     while running:
+        # filling here because we want to remove buttons after click
+        window.fill(background_colour)
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -63,27 +93,11 @@ def game_intro():
                 else:
                     user_text += event.unicode
 
-        # start message
-        text_surf, text_rect = text_objects("Enter balance, then choose a level", large_font)
-        text_rect.center = ((display_width / 2), (display_height / 3))
-        window.blit(text_surf, text_rect)
-
-        # start input box
-
-        # input_box = TextInput(0, 0, 0, 0, black, (130, 12, 22), 30)
-
-        input_rect = pygame.Rect(440, 340, 140, 40)
-        pygame.draw.rect(window, black, input_rect)
-        text_input_box_surface = small_font.render(user_text, True, white)
-
-        window.blit(text_input_box_surface, (input_rect.x + 5, input_rect.y + 5))
-
-        # buttons for levels - Easy, Hard
-
-        button("Easy", 240, 440, 140, 80, 80, green, bright_green, None)
-        button("Hard", 640, 440, 140, 80, 80, green, bright_green, None)
+        if not has_the_game_begun:
+            game_home_screen(user_text)
 
         pygame.display.update()
 
 
 game_intro()
+
