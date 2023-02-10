@@ -1,8 +1,10 @@
 import pygame
 from pygame.locals import *
 
+from src import card
 from src.deck import Deck
-from src.tools import button
+from src.game_engine import GameEngine
+from src.tools import button, button_with_parameter
 
 
 class TextInput(pygame.sprite.Sprite):
@@ -18,6 +20,8 @@ class TextInput(pygame.sprite.Sprite):
 game_balance = 0.0
 current_points = 0.0
 has_the_game_begun = False
+engine: GameEngine
+current_card: card.Card
 
 background_colour = (234, 212, 252)
 black = (0, 0, 0)
@@ -55,9 +59,14 @@ def text_objects(text, font):
     return text_surface, text_surface.get_rect()
 
 
-def begin_easy_game():
+def begin_easy_game(user_input):
     global has_the_game_begun
     has_the_game_begun = True
+
+    balance = float(user_input)
+    user_input = ''
+    global engine
+    engine = GameEngine(balance)
 
 
 def create_label(message, font, center_width, center_height):
@@ -85,9 +94,20 @@ def home_screen(user_input):
     create_input_box(440, 340, 140, 40, white, black, user_input)
 
     # buttons for levels - Easy, Hard
+    button_with_parameter("Easy", 240, 440, 140, 80, 80, green, bright_green, user_input, begin_easy_game)
+    button_with_parameter("Hard", 640, 440, 140, 80, 80, green, bright_green, user_input, None)
 
-    button("Easy", 240, 440, 140, 80, 80, green, bright_green, begin_easy_game)
-    button("Hard", 640, 440, 140, 80, 80, green, bright_green, None)
+
+def bet_lower(user_input):
+    bet_price = float(user_input)
+
+    global game_balance
+    game_balance, current_card = engine.bet(bet_price, False)
+
+
+def bet_higher(user_input):
+    bet_price = float(user_input)
+    engine.bet(bet_price, True)
 
 
 def game_screen(user_input):
@@ -102,8 +122,9 @@ def game_screen(user_input):
     # create_input_box(20, 30, 70, 40, black, background_colour, str(game_balance))
     # create_input_box(970, 30, 70, 40, black, background_colour, str(current_points))
 
-    button("LOWER", 250, 550, 150, 50, 40, green, bright_green, None)
-    button("HIGHER", (display_width / 2) + 112, 550, 150, 50, 40, green, bright_green, None)
+    button_with_parameter("LOWER", 250, 550, 150, 50, 40, green, bright_green, user_input, bet_lower)
+    button_with_parameter("HIGHER", (display_width / 2) + 112, 550, 150, 50, 40, green, bright_green, user_input,
+                          bet_higher)
 
     chance_higher = 60
     chance_lower = 40
@@ -120,13 +141,13 @@ def game_screen(user_input):
     button("Shuffle", 30, 720, 150, 40, 40, green, bright_green, None)
     button("Finish", 850, 720, 150, 40, 40, green, bright_green, None)
 
-    card = pygame.image.load('../resources/cards/CLUB-1.svg')
+    last_card = engine.get_last_drawn()
+    card = pygame.image.load('../resources/cards/' + str(last_card.get_suit().name) + '-' + str(last_card.get_rank())
+                             + '.svg')
     card = pygame.transform.scale(card, (200, 320))
 
     window.blit(card, (50, 100))
     pygame.display.flip()
-
-
 
 
 def game_intro():
