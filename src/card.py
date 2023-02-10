@@ -18,3 +18,9 @@ class Card:
         self.suit = suit
         self.rank = rank
         self.image = pygame.image.load('../resources/cards/' + suit.name + '-' + str(rank) + '.svg')
+
+    def get_rank(self) -> int:
+        return self.rank
+
+    def get_suit(self) -> Suits:
+        return self.suit
