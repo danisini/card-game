@@ -1,6 +1,6 @@
 import pygame
 
-
+clock = pygame.time.Clock()
 black = (0, 0, 0)
 display_width = 1024
 display_height = 800
@@ -25,6 +25,7 @@ def button(message, start_x, start_y, width, height, font_size, inactive_color, 
         # is_clicked has 3 values (False, False, False) for left, middle, right button of the mouse
         if is_clicked[0] == 1 and action is not None:
             action()
+            clock.tick(60)
     else:
         pygame.draw.rect(window, inactive_color, button_rect)
 

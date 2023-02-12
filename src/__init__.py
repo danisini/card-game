@@ -1,4 +1,5 @@
 import pygame
+import sys
 from pygame.locals import *
 
 from src import card
@@ -6,19 +7,11 @@ from src.deck import Deck
 from src.game_engine import GameEngine
 from src.tools import button, button_with_parameter
 
-
-class TextInput(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, color, bg_color, font_size):
-        self.text_value = ""
-        self.color = color
-        self.bg_color = bg_color
-        self.font = pygame.font.SysFont("Corbel", font_size)
-        self.text = self.font.render(self.text_value, True, self.color)
-        self.bg = pygame.Rect(x, y, width, height)
-
-
-game_balance = 0.0
+clock = pygame.time.Clock()
+curr_game_balance = 0.0
 current_points = 0.0
+curr_chance_lower = 0.0
+curr_chance_higher = 0.0
 has_the_game_begun = False
 engine: GameEngine
 current_card: card.Card
@@ -45,6 +38,9 @@ large_font = pygame.font.SysFont('Corbel', 60)
 small_font = pygame.font.SysFont('Corbel', 25)
 the_smallest_font = pygame.font.SysFont('Corbel', 12)
 
+rank_before_previous = 0
+rank_previous = 0
+
 running = True
 
 # cardBack = pygame.image.load('../resources/cards/BACK.png')
@@ -60,13 +56,9 @@ def text_objects(text, font):
 
 
 def begin_easy_game(user_input):
-    global has_the_game_begun
+    global has_the_game_begun, engine
     has_the_game_begun = True
-
-    balance = float(user_input)
-    user_input = ''
-    global engine
-    engine = GameEngine(balance)
+    engine = GameEngine(float(user_input))
 
 
 def create_label(message, font, center_width, center_height):
@@ -84,8 +76,8 @@ def create_input_box(start_x, start_y, width, height, color_font, bg_color, text
 
 
 def home_screen(user_input):
-    global game_balance
-    game_balance = 100.0
+    global curr_game_balance
+    curr_game_balance = 100.0
 
     # start message
     create_label("Enter balance, then choose a level", large_font, (display_width / 2), (display_height / 3))
@@ -101,18 +93,21 @@ def home_screen(user_input):
 def bet_lower(user_input):
     bet_price = float(user_input)
 
-    global game_balance
-    game_balance, current_card = engine.bet(bet_price, False)
+    global curr_game_balance, current_points, curr_chance_lower, curr_chance_higher
+    curr_game_balance, current_points, curr_chance_lower, curr_chance_higher = engine.bet(bet_price, False)
+    print(curr_game_balance)
 
 
 def bet_higher(user_input):
     bet_price = float(user_input)
-    engine.bet(bet_price, True)
+    global curr_game_balance, current_points, curr_chance_lower, curr_chance_higher
+    curr_game_balance, current_points, curr_chance_lower, curr_chance_higher = engine.bet(bet_price, True)
+    print(curr_game_balance)
 
 
 def game_screen(user_input):
     create_label("Balance", small_font, 50, 15)
-    create_label(str(game_balance), small_font, 50, 40)
+    create_label(str(curr_game_balance), small_font, 50, 40)
 
     create_label("Points", small_font, display_width - 50, 15)
     create_label(str(current_points), small_font, display_width - 50, 40)
@@ -126,15 +121,12 @@ def game_screen(user_input):
     button_with_parameter("HIGHER", (display_width / 2) + 112, 550, 150, 50, 40, green, bright_green, user_input,
                           bet_higher)
 
-    chance_higher = 60
-    chance_lower = 40
-
     # because it's easy game
     create_label("Chance: ", small_font, 300, 620)
-    create_label(str(chance_lower) + '%', small_font, 355, 620)
+    create_label(str(curr_chance_higher) + '%', small_font, 355, 620)
 
     create_label("Chance: ", small_font, 680, 620)
-    create_label(str(chance_higher) + '%', small_font, 735, 620)
+    create_label(str(curr_chance_lower) + '%', small_font, 735, 620)
 
     # shuffle & finish button
 
@@ -170,6 +162,8 @@ def game_intro():
         else:
             game_screen(user_text)
         pygame.display.update()
+
+        clock.tick(1000)
 
 
 game_intro()
