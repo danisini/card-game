@@ -13,6 +13,7 @@ current_points = 0.0
 curr_chance_lower = 0.0
 curr_chance_higher = 0.0
 has_the_game_begun = False
+is_the_game_hard = False
 engine: GameEngine
 current_card: card.Card
 
@@ -56,8 +57,16 @@ def text_objects(text, font):
 
 
 def begin_easy_game(user_input):
-    global has_the_game_begun, engine
+    global has_the_game_begun, engine, is_the_game_hard
     has_the_game_begun = True
+    is_the_game_hard = False
+    engine = GameEngine(float(user_input))
+
+
+def begin_hard_game(user_input):
+    global has_the_game_begun, engine, is_the_game_hard
+    has_the_game_begun = True
+    is_the_game_hard = True
     engine = GameEngine(float(user_input))
 
 
@@ -87,7 +96,7 @@ def home_screen(user_input):
 
     # buttons for levels - Easy, Hard
     button_with_parameter("Easy", 240, 440, 140, 80, 80, green, bright_green, user_input, begin_easy_game)
-    button_with_parameter("Hard", 640, 440, 140, 80, 80, green, bright_green, user_input, None)
+    button_with_parameter("Hard", 640, 440, 140, 80, 80, green, bright_green, user_input, begin_hard_game)
 
 
 def bet_lower(user_input):
@@ -110,6 +119,11 @@ def shuffle():
     current_points, curr_chance_lower, curr_chance_higher = engine.shuffle()
 
 
+def finish():
+    global has_the_game_begun, curr_chance_lower, curr_chance_higher, curr_game_balance, current_points
+    has_the_game_begun = False
+    curr_chance_lower = curr_chance_higher = curr_game_balance = current_points = 0.0
+
 
 def game_screen(user_input):
     create_label("Balance", small_font, 50, 15)
@@ -127,17 +141,18 @@ def game_screen(user_input):
     button_with_parameter("HIGHER", (display_width / 2) + 112, 550, 150, 50, 40, green, bright_green, user_input,
                           bet_higher)
 
-    # because it's easy game
-    create_label("Chance: ", small_font, 300, 620)
-    create_label(str(curr_chance_lower) + '%', small_font, 355, 620)
+    if not is_the_game_hard:
+        # because it's easy game
+        create_label("Chance: ", small_font, 300, 620)
+        create_label(str(curr_chance_lower) + '%', small_font, 355, 620)
 
-    create_label("Chance: ", small_font, 680, 620)
-    create_label(str(curr_chance_higher) + '%', small_font, 735, 620)
+        create_label("Chance: ", small_font, 680, 620)
+        create_label(str(curr_chance_higher) + '%', small_font, 735, 620)
 
     # shuffle & finish button
 
     button("Shuffle", 30, 720, 150, 40, 40, green, bright_green, shuffle)
-    button("Finish", 850, 720, 150, 40, 40, green, bright_green, None)
+    button("Finish", 850, 720, 150, 40, 40, green, bright_green, finish)
 
     last_card = engine.get_last_drawn()
     card = pygame.image.load('../resources/cards/' + str(last_card.get_suit().name) + '-' + str(last_card.get_rank())

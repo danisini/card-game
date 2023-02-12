@@ -41,7 +41,7 @@ class GameEngine:
         self.points = round(self.points, 2)
 
     def shuffle(self) -> (float, float, float):
-        if self.lock != 1:
+        if self.lock != 1 and self.deck.get_cnt_all_cards() < 51:
             self.points = round(self.points / 2, 2)
             self.deck.shuffle()
             self.last_drawn = self.deck.draw_card()
