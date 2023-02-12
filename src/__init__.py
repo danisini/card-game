@@ -105,6 +105,12 @@ def bet_higher(user_input):
     print(curr_game_balance)
 
 
+def shuffle():
+    global engine, current_points, curr_chance_lower, curr_chance_higher
+    current_points, curr_chance_lower, curr_chance_higher = engine.shuffle()
+
+
+
 def game_screen(user_input):
     create_label("Balance", small_font, 50, 15)
     create_label(str(curr_game_balance), small_font, 50, 40)
@@ -123,14 +129,14 @@ def game_screen(user_input):
 
     # because it's easy game
     create_label("Chance: ", small_font, 300, 620)
-    create_label(str(curr_chance_higher) + '%', small_font, 355, 620)
+    create_label(str(curr_chance_lower) + '%', small_font, 355, 620)
 
     create_label("Chance: ", small_font, 680, 620)
-    create_label(str(curr_chance_lower) + '%', small_font, 735, 620)
+    create_label(str(curr_chance_higher) + '%', small_font, 735, 620)
 
     # shuffle & finish button
 
-    button("Shuffle", 30, 720, 150, 40, 40, green, bright_green, None)
+    button("Shuffle", 30, 720, 150, 40, 40, green, bright_green, shuffle)
     button("Finish", 850, 720, 150, 40, 40, green, bright_green, None)
 
     last_card = engine.get_last_drawn()

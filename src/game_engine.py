@@ -40,6 +40,15 @@ class GameEngine:
 
         self.points = round(self.points, 2)
 
+    def shuffle(self) -> (float, float, float):
+        if self.lock != 1:
+            self.points = round(self.points / 2, 2)
+            self.deck.shuffle()
+            self.last_drawn = self.deck.draw_card()
+            self.__calculate_chances__()
+
+        return self.points, self.chance_lower, self.chance_higher
+
     def bet(self, bet_price: float, is_higher: bool) -> (float, float, float, float):
 
         if self.lock == 1:
