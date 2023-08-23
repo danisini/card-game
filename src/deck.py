@@ -49,5 +49,3 @@ class Deck:
                 self.cards_left.append(card.Card(suit, rank))
 
         random.shuffle(self.cards_left)
-
-

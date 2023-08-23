@@ -85,7 +85,7 @@ class GameEngine:
 
     def __check_guess(self, curr_card, is_higher) -> GUESS:
         guess: GUESS
-        print(self.last_drawn.get_rank(),  curr_card.get_rank())
+        print(self.last_drawn.get_rank(), curr_card.get_rank())
         if self.last_drawn.get_rank() > curr_card.get_rank():
             if is_higher:
                 guess = GUESS.WRONG

@@ -158,8 +158,9 @@ def game_screen(user_input):
     button("Finish", 850, 720, 150, 40, 40, green, bright_green, finish)
 
     last_card = engine.get_last_drawn()
-    card = pygame.image.load('../resources/cards/' + str(last_card.get_suit().name).lower() + '_' + str(last_card.get_rank())
-                             + '.svg')
+    card = pygame.image.load(
+        '../resources/cards/' + str(last_card.get_suit().name).lower() + '_' + str(last_card.get_rank())
+        + '.svg')
     card = pygame.transform.scale(card, (200, 320))
 
     window.blit(card, (50, 100))

@@ -3,4 +3,3 @@ def is_bet_possible(balance, bet_price) -> bool:
         return False
 
     return True
-
