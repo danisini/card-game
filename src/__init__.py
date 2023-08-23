@@ -1,23 +1,21 @@
 import pygame
+import sys
 from pygame.locals import *
 
+from src import card
 from src.deck import Deck
-from src.tools import button
+from src.game_engine import GameEngine
+from src.tools import button, button_with_parameter
 
-
-class TextInput(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, color, bg_color, font_size):
-        self.text_value = ""
-        self.color = color
-        self.bg_color = bg_color
-        self.font = pygame.font.SysFont("Corbel", font_size)
-        self.text = self.font.render(self.text_value, True, self.color)
-        self.bg = pygame.Rect(x, y, width, height)
-
-
-game_balance = 0.0
+clock = pygame.time.Clock()
+curr_game_balance = 0.0
 current_points = 0.0
+curr_chance_lower = 0.0
+curr_chance_higher = 0.0
 has_the_game_begun = False
+is_the_game_hard = False
+engine: GameEngine
+current_card: card.Card
 
 background_colour = (234, 212, 252)
 black = (0, 0, 0)
@@ -41,6 +39,9 @@ large_font = pygame.font.SysFont('Corbel', 60)
 small_font = pygame.font.SysFont('Corbel', 25)
 the_smallest_font = pygame.font.SysFont('Corbel', 12)
 
+rank_before_previous = 0
+rank_previous = 0
+
 running = True
 
 
@@ -56,9 +57,18 @@ def text_objects(text, font):
     return text_surface, text_surface.get_rect()
 
 
-def begin_easy_game():
-    global has_the_game_begun
+def begin_easy_game(user_input):
+    global has_the_game_begun, engine, is_the_game_hard
     has_the_game_begun = True
+    is_the_game_hard = False
+    engine = GameEngine(float(user_input))
+
+
+def begin_hard_game(user_input):
+    global has_the_game_begun, engine, is_the_game_hard
+    has_the_game_begun = True
+    is_the_game_hard = True
+    engine = GameEngine(float(user_input))
 
 
 def create_label(message, font, center_width, center_height):
@@ -76,8 +86,8 @@ def create_input_box(start_x, start_y, width, height, color_font, bg_color, text
 
 
 def home_screen(user_input):
-    global game_balance
-    game_balance = 100.0
+    global curr_game_balance
+    curr_game_balance = 100.0
 
     # start message
     create_label("Enter balance, then choose a level", large_font, (display_width / 2), (display_height / 3))
@@ -86,14 +96,41 @@ def home_screen(user_input):
     create_input_box(440, 340, 140, 40, white, black, user_input)
 
     # buttons for levels - Easy, Hard
+    button_with_parameter("Easy", 240, 440, 140, 80, 80, green, bright_green, user_input, begin_easy_game)
+    button_with_parameter("Hard", 640, 440, 140, 80, 80, green, bright_green, user_input, begin_hard_game)
 
-    button("Easy", 240, 440, 140, 80, 80, green, bright_green, begin_easy_game)
-    button("Hard", 640, 440, 140, 80, 80, green, bright_green, None)
+
+def bet_lower(user_input):
+    clock.tick(60)
+    bet_price = float(user_input)
+
+    global curr_game_balance, current_points, curr_chance_lower, curr_chance_higher
+    curr_game_balance, current_points, curr_chance_lower, curr_chance_higher = engine.bet(bet_price, False)
+    print(curr_game_balance)
+
+
+def bet_higher(user_input):
+    clock.tick(60)
+    bet_price = float(user_input)
+    global curr_game_balance, current_points, curr_chance_lower, curr_chance_higher
+    curr_game_balance, current_points, curr_chance_lower, curr_chance_higher = engine.bet(bet_price, True)
+    print(curr_game_balance)
+
+
+def shuffle():
+    global engine, current_points, curr_chance_lower, curr_chance_higher
+    current_points, curr_chance_lower, curr_chance_higher = engine.shuffle()
+
+
+def finish():
+    global has_the_game_begun, curr_chance_lower, curr_chance_higher, curr_game_balance, current_points
+    has_the_game_begun = False
+    curr_chance_lower = curr_chance_higher = curr_game_balance = current_points = 0.0
 
 
 def game_screen(user_input):
     create_label("Balance", small_font, 50, 15)
-    create_label(str(game_balance), small_font, 50, 40)
+    create_label(str(curr_game_balance), small_font, 50, 40)
 
     create_label("Points", small_font, display_width - 50, 15)
     create_label(str(current_points), small_font, display_width - 50, 40)
@@ -103,25 +140,26 @@ def game_screen(user_input):
     # create_input_box(20, 30, 70, 40, black, background_colour, str(game_balance))
     # create_input_box(970, 30, 70, 40, black, background_colour, str(current_points))
 
-    button("LOWER", 250, 550, 150, 50, 40, green, bright_green, None)
-    button("HIGHER", (display_width / 2) + 112, 550, 150, 50, 40, green, bright_green, None)
+    button_with_parameter("LOWER", 250, 550, 150, 50, 40, green, bright_green, user_input, bet_lower)
+    button_with_parameter("HIGHER", (display_width / 2) + 112, 550, 150, 50, 40, green, bright_green, user_input,
+                          bet_higher)
 
-    chance_higher = 60
-    chance_lower = 40
+    if not is_the_game_hard:
+        # because it's easy game
+        create_label("Chance: ", small_font, 280, 620)
+        create_label(str(curr_chance_lower) + '%', small_font, 355, 620)
 
-    # because it's easy game
-    create_label("Chance: ", small_font, 300, 620)
-    create_label(str(chance_lower) + '%', small_font, 355, 620)
-
-    create_label("Chance: ", small_font, 680, 620)
-    create_label(str(chance_higher) + '%', small_font, 735, 620)
+        create_label("Chance: ", small_font, 660, 620)
+        create_label(str(curr_chance_higher) + '%', small_font, 735, 620)
 
     # shuffle & finish button
 
-    button("Shuffle", 30, 720, 150, 40, 40, green, bright_green, None)
-    button("Finish", 850, 720, 150, 40, 40, green, bright_green, None)
+    button("Shuffle", 30, 720, 150, 40, 40, green, bright_green, shuffle)
+    button("Finish", 850, 720, 150, 40, 40, green, bright_green, finish)
 
-    card = pygame.image.load('../resources/cards/clubs_6.svg')
+    last_card = engine.get_last_drawn()
+    card = pygame.image.load('../resources/cards/' + str(last_card.get_suit().name).lower() + '_' + str(last_card.get_rank())
+                             + '.svg')
     card = pygame.transform.scale(card, (200, 320))
 
     window.blit(card, (50, 100))
@@ -148,6 +186,8 @@ def game_intro():
         else:
             game_screen(user_text)
         pygame.display.update()
+
+        clock.tick(100)
 
 
 game_intro()

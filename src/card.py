@@ -3,10 +3,10 @@ import pygame
 
 
 class Suits(Enum):
-    CLUB = 0
-    DIAMOND = 1
-    HEART = 2
-    SPADE = 3
+    CLUBS = 0
+    DIAMONDS = 1
+    HEARTS = 2
+    SPADES = 3
 
 
 class Card:
@@ -18,3 +18,9 @@ class Card:
         self.suit = suit
         self.rank = rank
         self.image = pygame.image.load('../resources/cards/' + suit.name.lower() + '_' + str(rank) + '.svg')
+
+    def get_rank(self) -> int:
+        return self.rank
+
+    def get_suit(self) -> Suits:
+        return self.suit
