@@ -43,6 +43,7 @@ the_smallest_font = pygame.font.SysFont('Corbel', 12)
 
 running = True
 
+
 # cardBack = pygame.image.load('../resources/cards/BACK.png')
 # cardBack = pygame.transform.scale(cardBack, (100, 160))
 
@@ -120,13 +121,11 @@ def game_screen(user_input):
     button("Shuffle", 30, 720, 150, 40, 40, green, bright_green, None)
     button("Finish", 850, 720, 150, 40, 40, green, bright_green, None)
 
-    card = pygame.image.load('../resources/cards/CLUB-1.svg')
+    card = pygame.image.load('../resources/cards/clubs_6.svg')
     card = pygame.transform.scale(card, (200, 320))
 
     window.blit(card, (50, 100))
     pygame.display.flip()
-
-
 
 
 def game_intro():
@@ -152,4 +151,3 @@ def game_intro():
 
 
 game_intro()
-
